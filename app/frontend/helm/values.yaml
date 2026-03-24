@@ -11,7 +11,7 @@ image:
 imagePullSecrets: []
 
 runtimeConfig:
-  apiBaseUrl: https://api.45.139.78.241.nio.io/api
+  apiBaseUrl: https://api.45.139.78.241.nip.io/api
 
 service:
   type: ClusterIP
@@ -23,7 +23,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: 45.139.78.241.nio.io
+    - host: 45.139.78.241.nip.io
       paths:
         - path: /
           pathType: Prefix
