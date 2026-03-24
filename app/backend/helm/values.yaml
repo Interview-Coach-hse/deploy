@@ -55,11 +55,11 @@ database:
 
 probes:
   readiness:
-    path: api/actuator/health/readiness
+    path: /api/actuator/health/readiness
     initialDelaySeconds: 20
     periodSeconds: 10
   liveness:
-    path: api/actuator/health/liveness
+    path: /api/actuator/health/liveness
     initialDelaySeconds: 30
     periodSeconds: 15
 
