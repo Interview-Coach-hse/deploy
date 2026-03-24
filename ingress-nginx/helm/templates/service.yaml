@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "interview-coach-ingress-nginx.fullname" . }}
+  labels:
+    {{- include "interview-coach-ingress-nginx.labels" . | nindent 4 }}
+  {{- with .Values.controller.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.controller.service.type }}
+  selector:
+    {{- include "interview-coach-ingress-nginx.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.controller.service.ports.http }}
+      targetPort: http
+    - name: https
+      port: {{ .Values.controller.service.ports.https }}
+      targetPort: https

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "interview-coach-postgres.fullname" . }}
+  labels:
+    {{- include "interview-coach-postgres.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "interview-coach-postgres.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: postgres
+      port: {{ .Values.service.port }}
+      targetPort: postgres

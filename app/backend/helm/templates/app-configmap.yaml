@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "interview-coach-backend.configName" . }}
+  labels:
+    {{- include "interview-coach-backend.labels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.env.serverPort | quote }}
+  APP_SECURITY_JWT_ISSUER: {{ .Values.env.jwtIssuer | quote }}
+  APP_SECURITY_JWT_ACCESS_TOKEN_MINUTES: {{ .Values.env.jwtAccessTokenMinutes | quote }}
+  APP_SECURITY_JWT_REFRESH_TOKEN_DAYS: {{ .Values.env.jwtRefreshTokenDays | quote }}
+  APP_SECURITY_EMAIL_VERIFICATION_EXPIRATION_MINUTES: {{ .Values.env.emailVerificationExpirationMinutes | quote }}
+  APP_SECURITY_EMAIL_VERIFICATION_MAX_ATTEMPTS: {{ .Values.env.emailVerificationMaxAttempts | quote }}
+  APP_SECURITY_CORS_ALLOWED_ORIGINS: {{ .Values.env.corsAllowedOrigins | quote }}
+  APP_MAIL_ENABLED: {{ .Values.env.mailEnabled | quote }}
+  APP_MAIL_FROM: {{ .Values.env.mailFrom | quote }}
+  APP_MAIL_EMAIL_VERIFICATION_SUBJECT: {{ .Values.env.mailVerificationSubject | quote }}
+  APP_MAIL_PASSWORD_RESET_SUBJECT: {{ .Values.env.mailResetSubject | quote }}
+  APP_FRONTEND_PASSWORD_RESET_URL: {{ .Values.env.frontendPasswordResetUrl | quote }}
+  SPRING_MAIL_HOST: {{ .Values.env.springMailHost | quote }}
+  SPRING_MAIL_PORT: {{ .Values.env.springMailPort | quote }}
+  SPRING_MAIL_USERNAME: {{ .Values.env.springMailUsername | quote }}
+  SPRING_MAIL_SMTP_AUTH: {{ .Values.env.springMailSmtpAuth | quote }}
+  SPRING_MAIL_SMTP_STARTTLS: {{ .Values.env.springMailSmtpStarttls | quote }}
+  SPRING_DATASOURCE_URL: {{ printf "jdbc:postgresql://%s:%v/%s" .Values.database.host .Values.database.port .Values.database.name | quote }}
+  SPRING_DATASOURCE_USERNAME: {{ .Values.database.username | quote }}
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: {{ .Values.env.managementTracingSamplingProbability | quote }}
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: {{ .Values.env.managementOtlpTracingEndpoint | quote }}
+  APP_ASSESSMENT_ENABLED: {{ .Values.env.assessmentEnabled | quote }}
+  APP_ASSESSMENT_BASE_URL: {{ .Values.env.assessmentBaseUrl | quote }}
+  APP_ASSESSMENT_CLIENT_ID: {{ .Values.env.assessmentClientId | quote }}
+  APP_ASSESSMENT_MODE: {{ .Values.env.assessmentMode | quote }}
+  APP_ASSESSMENT_QUESTION_LIMIT: {{ .Values.env.assessmentQuestionLimit | quote }}
+  APP_ASSESSMENT_REPORT_LANGUAGE: {{ .Values.env.assessmentReportLanguage | quote }}
+  APP_ASSESSMENT_SUBSCRIPTION_PLAN: {{ .Values.env.assessmentSubscriptionPlan | quote }}

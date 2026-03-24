@@ -1,0 +1,45 @@
+nameOverride: ""
+fullnameOverride: "interview-coach-frontend"
+
+replicaCount: 2
+
+image:
+  repository: sirlazybone/interview-frontend
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+runtimeConfig:
+  apiBaseUrl: https://api.45.139.78.241.nio.io/api
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: 45.139.78.241.nio.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - interview-coach.example.com
+      secretName: interview-coach-frontend-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

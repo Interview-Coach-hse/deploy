@@ -1,0 +1,33 @@
+nameOverride: ""
+fullnameOverride: "ingress-nginx-controller"
+
+controller:
+  replicaCount: 1
+  image:
+    repository: registry.k8s.io/ingress-nginx/controller
+    tag: "v1.11.3"
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: ""
+  service:
+    type: LoadBalancer
+    annotations: {}
+    ports:
+      http: 80
+      https: 443
+  ingressClass:
+    name: nginx
+    controllerValue: k8s.io/ingress-nginx
+  electionId: ingress-nginx-leader
+  config:
+    use-forwarded-headers: "true"
+    compute-full-forwarded-for: "true"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+  podLabels: {}

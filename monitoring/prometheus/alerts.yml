@@ -1,0 +1,19 @@
+groups:
+  - name: interview-coach
+    rules:
+      - alert: InterviewCoachAppDown
+        expr: up{job="interview-coach-app"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Interview Coach app is down
+          description: Prometheus cannot scrape the Interview Coach app for more than 2 minutes.
+      - alert: InterviewCoachHighErrorRate
+        expr: rate(http_server_requests_seconds_count{job="interview-coach-app",status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Interview Coach returns too many 5xx responses
+          description: The backend is serving more than 0.05 5xx responses per second for 5 minutes.

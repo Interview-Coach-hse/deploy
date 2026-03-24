@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "interview-coach-ingress-nginx.fullname" . }}
+  labels:
+    {{- include "interview-coach-ingress-nginx.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.controller.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "interview-coach-ingress-nginx.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "interview-coach-ingress-nginx.selectorLabels" . | nindent 8 }}
+        {{- with .Values.controller.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "interview-coach-ingress-nginx.serviceAccountName" . }}
+      containers:
+        - name: controller
+          image: "{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}"
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          args:
+            - /nginx-ingress-controller
+            - --election-id={{ .Values.controller.electionId }}
+            - --controller-class={{ .Values.controller.ingressClass.controllerValue }}
+            - --ingress-class={{ .Values.controller.ingressClass.name }}
+            - --configmap=$(POD_NAMESPACE)/{{ include "interview-coach-ingress-nginx.configMapName" . }}
+            - --publish-service=$(POD_NAMESPACE)/{{ include "interview-coach-ingress-nginx.fullname" . }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+            - name: health
+              containerPort: 10254
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.controller.resources | nindent 12 }}

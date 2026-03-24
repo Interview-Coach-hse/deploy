@@ -1,0 +1,12 @@
+1. Install the chart:
+   helm upgrade --install {{ .Release.Name }} {{ .Chart.Name }} \
+     --namespace <namespace> --create-namespace
+
+2. Configure backend database access through values:
+   database.host, database.port, database.name, database.username, database.password
+
+3. Check resources:
+   kubectl get pods,svc,ingress -n <namespace>
+
+4. If ingress is disabled, port-forward the backend:
+   kubectl port-forward svc/{{ include "interview-coach-backend.fullname" . }} 8080:{{ .Values.service.port }} -n <namespace>

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "interview-coach-frontend.fullname" . }}-config
+  labels:
+    {{- include "interview-coach-frontend.labels" . | nindent 4 }}
+data:
+  app-config.js: |
+    window.__APP_CONFIG__ = {
+      apiBaseUrl: {{ .Values.runtimeConfig.apiBaseUrl | quote }},
+    };

@@ -1,0 +1,3 @@
+1. Get the application URL by running these commands:
+  export POD_NAMESPACE={{ .Release.Namespace }}
+  kubectl get ingress {{ include "interview-coach-frontend.fullname" . }} -n $POD_NAMESPACE

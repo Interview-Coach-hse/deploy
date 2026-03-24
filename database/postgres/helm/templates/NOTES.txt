@@ -1,0 +1,9 @@
+1. Install the chart:
+   helm upgrade --install {{ .Release.Name }} {{ .Chart.Name }} \
+     --namespace <namespace> --create-namespace
+
+2. Check the service name for backend integration:
+   kubectl get svc {{ include "interview-coach-postgres.fullname" . }} -n <namespace>
+
+3. Use this hostname in backend values:
+   {{ include "interview-coach-postgres.fullname" . }}

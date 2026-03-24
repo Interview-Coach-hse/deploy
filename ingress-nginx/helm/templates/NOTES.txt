@@ -1,0 +1,5 @@
+Install example:
+
+  helm upgrade --install ingress-nginx ./ingress-nginx/helm/interview-coach-ingress-nginx \
+    --namespace ingress-nginx \
+    --create-namespace

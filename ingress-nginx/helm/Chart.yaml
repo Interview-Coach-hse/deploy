@@ -1,0 +1,6 @@
+apiVersion: v2
+name: interview-coach-ingress-nginx
+description: Helm chart for ingress-nginx controller
+type: application
+version: 0.1.0
+appVersion: "1.11.3"

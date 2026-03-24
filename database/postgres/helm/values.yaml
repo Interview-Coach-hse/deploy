@@ -1,0 +1,22 @@
+nameOverride: ""
+fullnameOverride: "interview-coach-postgres"
+
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 5432
+
+database:
+  name: interview_coach
+  username: interview_coach
+  password: interview_coach
+
+resources: {}
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""

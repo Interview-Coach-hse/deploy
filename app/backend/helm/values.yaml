@@ -1,0 +1,77 @@
+nameOverride: ""
+fullnameOverride: "interview-coach-backend"
+
+replicaCount: 1
+
+image:
+  repository: sirlazybone/interview-backend
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources: {}
+
+env:
+  serverPort: 8080
+  jwtIssuer: interview-coach
+  jwtAccessTokenMinutes: 15
+  jwtRefreshTokenDays: 7
+  emailVerificationExpirationMinutes: 15
+  emailVerificationMaxAttempts: 5
+  corsAllowedOrigins: http://45.139.78.241.nio.io
+  mailEnabled: false
+  mailFrom: no-reply@interview-coach.example.com
+  mailVerificationSubject: Interview Coach email verification
+  mailResetSubject: Interview Coach password reset
+  frontendPasswordResetUrl: http://45.139.78.241.nio.io/reset-password
+  springMailHost: smtp.gmail.com
+  springMailPort: 587
+  springMailUsername: no-reply@interview-coach.example.com
+  springMailSmtpAuth: true
+  springMailSmtpStarttls: true
+  managementTracingSamplingProbability: "1.0"
+  managementOtlpTracingEndpoint: http://otel-collector:4318/v1/traces
+  assessmentEnabled: false
+  assessmentBaseUrl: http://assessment-service:8000
+  assessmentClientId: main-backend
+  assessmentMode: sync
+  assessmentQuestionLimit: 10
+  assessmentReportLanguage: ru
+  assessmentSubscriptionPlan: start
+
+secrets:
+  jwtSecret: change-me-very-long-random-jwt-secret
+  springMailPassword: change-me-mail-password
+
+database:
+  host: interview-coach-postgres
+  port: 5432
+  name: interview_coach
+  username: interview_coach
+  password: interview_coach
+
+probes:
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 20
+    periodSeconds: 10
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: api.45.139.78.241.nio.io
+      paths:
+        - path: /
+          pathType: Prefix
+  # TLS intentionally disabled for the initial bring-up.
+  # Uncomment and fill in real values after cert-manager/issuer/certificates are ready.
+  tls: []
