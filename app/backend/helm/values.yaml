@@ -33,7 +33,7 @@ env:
   springMailSmtpAuth: true
   springMailSmtpStarttls: true
   managementTracingSamplingProbability: "1.0"
-  managementOtlpTracingEndpoint: http://otel-collector:4318/v1/traces
+  managementOtlpTracingEndpoint: http://otel-collector.monitoring.svc.cluster.local:4318/v1/traces
   assessmentEnabled: false
   assessmentBaseUrl: http://assessment-service:8000
   assessmentClientId: main-backend

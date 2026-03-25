@@ -11,7 +11,7 @@ image:
 imagePullSecrets: []
 
 runtimeConfig:
-  apiBaseUrl: https://api.45.139.78.241.nip.io/api
+  apiBaseUrl: http://api.45.139.78.241.nip.io/api
 
 service:
   type: ClusterIP
@@ -20,17 +20,13 @@ service:
 ingress:
   enabled: true
   className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+  annotations: {}
   hosts:
     - host: 45.139.78.241.nip.io
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - hosts:
-        - interview-coach.example.com
-      secretName: interview-coach-frontend-tls
+  tls: {}
 
 resources:
   requests:
