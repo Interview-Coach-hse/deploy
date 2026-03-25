@@ -1,0 +1,16 @@
+fullnameOverride: tempo
+
+persistence:
+  enabled: true
+  size: 10Gi
+  # storageClassName: local-path
+
+tempo:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+
+service:
+  type: ClusterIP

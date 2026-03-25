@@ -10,11 +10,7 @@
 - `app/frontend` - Helm chart frontend-приложения
 - `app/bot` - место под deployment бота
 - `app/worker` - место под deployment worker-процессов
-- `monitoring/prometheus` - конфиг Prometheus, alert rules и manifest Alertmanager
-- `monitoring/grafana` - provisioning Grafana
-- `monitoring/loki` - конфиги Loki и Promtail
-- `monitoring/tempo` - конфиг Tempo
-- `monitoring/otel` - конфиг OpenTelemetry Collector
+- `monitoring/helm` - values-файлы для community Helm charts Prometheus, Grafana, Loki, Promtail, Tempo и OpenTelemetry Collector
 - `ingress-nginx/helm/interview-coach-ingress-nginx` - Helm chart ingress controller
 - `cert-manager` - место под manifests cert-manager и issuers
 - `database/postgres/helm/interview-coach-postgres` - Helm chart PostgreSQL
@@ -26,6 +22,7 @@
 - `database/postgres/helm/interview-coach-postgres`
 - `app/backend/helm/interview-coach-backend`
 - `app/frontend`
+- `monitoring/helm` через community chart'ы
 
 Пример установки:
 
@@ -44,6 +41,10 @@ helm upgrade --install backend ./app/backend/helm/interview-coach-backend \
 helm upgrade --install frontend ./app/frontend \
   --namespace interview-coach
 ```
+
+Monitoring ставится отдельными community chart'ами. Команды и values смотри в:
+
+- `monitoring/README.md`
 
 Что нужно заполнить руками перед деплоем:
 

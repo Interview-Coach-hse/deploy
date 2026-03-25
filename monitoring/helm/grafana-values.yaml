@@ -1,0 +1,52 @@
+fullnameOverride: grafana
+
+adminUser: admin
+adminPassword: admin
+
+persistence:
+  enabled: true
+  size: 10Gi
+  # storageClassName: local-path
+
+service:
+  type: ClusterIP
+  port: 80
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus
+        isDefault: true
+        editable: true
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+        editable: true
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        url: http://tempo:3200
+        editable: true
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: loki
+          serviceMap:
+            datasourceUid: prometheus
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations: {}
+  hosts:
+    - grafana.45.139.78.241.nip.io
+  path: /
+  pathType: Prefix
+  tls: []
