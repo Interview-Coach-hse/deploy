@@ -1,99 +1,244 @@
-# Deploy structure
+# Deploy
 
-Репозиторий переведён на `Helm only`. Plain manifests и `kustomize` entrypoints убраны, основной способ установки компонентов теперь только через локальные Helm chart'ы.
+Репозиторий находится в режиме `Helm only`: приложение, ingress, monitoring и dashboard разворачиваются Helm chart'ами или community chart'ами с локальными `values.yaml`.
 
-Разделение сделано по доменам, а не по инструментам. Для отдельного deployment-репозитория это удобнее: приложение, мониторинг, ingress, сертификаты и база разнесены по независимым зонам ответственности.
+## Структура
 
-Структура:
+- `app/backend/helm` - Helm chart backend
+- `app/frontend/helm` - Helm chart frontend
+- `database/postgres/helm` - Helm chart PostgreSQL
+- `ingress-nginx/helm` - локальный Helm chart ingress-nginx controller
+- `monitoring/helm` - values для community chart'ов Prometheus, Grafana, Loki, Promtail, Tempo, OTel Collector
+- `monitoring/dashboards` - готовые Grafana dashboard JSON
+- `kubernetes-dashboard` - Helm install notes и admin service account для Kubernetes Dashboard
+- `cert-manager` - заметки по cert-manager
+- `app/bot`, `app/worker` - заготовки под будущие сервисы
 
-- `app/backend/helm/interview-coach-backend` - Helm chart backend-приложения с явными `database.*` параметрами
-- `app/frontend` - Helm chart frontend-приложения
-- `app/bot` - место под deployment бота
-- `app/worker` - место под deployment worker-процессов
-- `monitoring/helm` - values-файлы для community Helm charts Prometheus, Grafana, Loki, Promtail, Tempo и OpenTelemetry Collector
-- `ingress-nginx/helm/interview-coach-ingress-nginx` - Helm chart ingress controller
-- `cert-manager` - место под manifests cert-manager и issuers
-- `database/postgres/helm/interview-coach-postgres` - Helm chart PostgreSQL
-- `legacy/helm` - старый Helm chart, который сейчас смешивает backend и postgres в одном chart
+## Namespace'ы
 
-Что уже можно поднять через Helm:
+Сейчас в репозитории используются такие namespace'ы:
 
-- `ingress-nginx/helm/interview-coach-ingress-nginx`
-- `database/postgres/helm/interview-coach-postgres`
-- `app/backend/helm/interview-coach-backend`
-- `app/frontend`
-- `monitoring/helm` через community chart'ы
+- `ingress-nginx` - ingress controller
+- `app` - frontend, backend, postgres
+- `monitoring` - Prometheus, Grafana, Loki, Promtail, Tempo, OTel Collector
+- `kubernetes-dashboard` - Kubernetes Dashboard
 
-Пример установки:
+## Актуальные адреса
+
+Текущая конфигурация завязана на сервер `45.139.78.241` и `nip.io`:
+
+- frontend: `http://45.139.78.241.nip.io`
+- backend: `http://api.45.139.78.241.nip.io`
+- backend API base: `http://api.45.139.78.241.nip.io/api`
+- grafana: `http://grafana.45.139.78.241.nip.io`
+
+Важно: их нужно заменить в `values.yaml`, см. секцию ниже.
+
+## Установка
+
+### 1. ingress-nginx
 
 ```bash
-helm upgrade --install ingress-nginx ./ingress-nginx/helm/interview-coach-ingress-nginx \
+helm upgrade --install ingress-nginx ./ingress-nginx/helm \
   --namespace ingress-nginx \
-  --create-namespace
-
-helm upgrade --install postgres ./database/postgres/helm/interview-coach-postgres \
-  --namespace interview-coach \
-  --create-namespace
-
-helm upgrade --install backend ./app/backend/helm/interview-coach-backend \
-  --namespace interview-coach
-
-helm upgrade --install frontend ./app/frontend \
-  --namespace interview-coach
+  --create-namespace \
+  -f ./ingress-nginx/helm/values.yaml
 ```
 
-Monitoring ставится отдельными community chart'ами. Команды и values смотри в:
+### 2. PostgreSQL
 
-- `monitoring/README.md`
+```bash
+helm upgrade --install postgres ./database/postgres/helm \
+  --namespace app \
+  --create-namespace \
+  -f ./database/postgres/helm/values.yaml
+```
 
-Что нужно заполнить руками перед деплоем:
+### 3. Backend
 
-- `app/backend/helm/interview-coach-backend/values.yaml`
-- `app/frontend/values.yaml`
-- `database/postgres/helm/interview-coach-postgres/values.yaml`
-- `ingress-nginx/helm/interview-coach-ingress-nginx/values.yaml`
+```bash
+helm upgrade --install backend ./app/backend/helm \
+  --namespace app \
+  -f ./app/backend/helm/values.yaml
+```
 
-Обязательные значения для замены:
+### 4. Frontend
 
-- DNS-имена:
-  - `api.interview-coach.example.com`
-  - `interview-coach.example.com`
-- секреты:
-  - `APP_SECURITY_JWT_SECRET`
-  - `SPRING_MAIL_PASSWORD`
-  - `POSTGRES_PASSWORD`
-- почтовые настройки:
-  - `APP_MAIL_FROM`
-  - `SPRING_MAIL_USERNAME`
-  - `SPRING_MAIL_HOST`
-  - `SPRING_MAIL_PORT`
-- storage:
-  - `database/postgres/helm/interview-coach-postgres/values.yaml`: `persistence.size`
-  - `database/postgres/helm/interview-coach-postgres/values.yaml`: `persistence.storageClass`, если в кластере нет default storage class
-- container images:
-  - `interview-coach:latest`
-  - `interview-coach-frontend:latest`
-- ingress controller:
-  - `ingress-nginx/helm/interview-coach-ingress-nginx/values.yaml`: `controller.service.type`
-  - `ingress-nginx/helm/interview-coach-ingress-nginx/values.yaml`: `controller.image.tag`
+```bash
+helm upgrade --install frontend ./app/frontend/helm \
+  --namespace app \
+  -f ./app/frontend/helm/values.yaml
+```
 
-Замечания:
+### 5. Monitoring
 
-- frontend сейчас ожидает backend по внешнему адресу `http://api...`, а не по внутреннему service DNS
-- backend по умолчанию подключается к postgres service `interview-coach-postgres:5432`
-- TLS по умолчанию отключён в `frontend` и `backend` chart'ах: `ingress.annotations: {}` и `ingress.tls: []`
-- когда будешь включать HTTPS, верни `cert-manager.io/cluster-issuer` и заполни `ingress.tls` в:
-  - `app/backend/helm/interview-coach-backend/values.yaml`
-  - `app/frontend/values.yaml`
+Команды и values лежат в:
 
-Почему так лучше:
+- [`monitoring/README.md`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/README.md)
 
-- проще передавать владение между командами
-- легче строить overlays по окружениям
-- нет смешивания application manifests и monitoring-конфигов в одной папке
+Коротко:
 
-Рекомендация дальше:
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
 
-- использовать новые независимые chart'ы для backend и postgres
-- использовать community chart `prometheus-community/alertmanager` для alertmanager
-- удалить `legacy/helm/interview-coach` после окончательной миграции
+kubectl create namespace monitoring
+
+helm upgrade --install prometheus prometheus-community/prometheus \
+  --namespace monitoring \
+  --reset-values \
+  -f ./monitoring/helm/prometheus-values.yaml
+
+helm upgrade --install loki grafana/loki \
+  --namespace monitoring \
+  -f ./monitoring/helm/loki-values.yaml
+
+helm upgrade --install promtail grafana/promtail \
+  --namespace monitoring \
+  -f ./monitoring/helm/promtail-values.yaml
+
+helm upgrade --install tempo grafana/tempo \
+  --namespace monitoring \
+  -f ./monitoring/helm/tempo-values.yaml
+
+helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+  --namespace monitoring \
+  -f ./monitoring/helm/otel-collector-values.yaml
+
+helm upgrade --install grafana grafana/grafana \
+  --namespace monitoring \
+  -f ./monitoring/helm/grafana-values.yaml
+```
+
+### 6. Kubernetes Dashboard
+
+Инструкции и admin service account:
+
+- [`kubernetes-dashboard/README.md`](/Users/sir/Desktop/Diplom/project/deploy/kubernetes-dashboard/README.md)
+- [`kubernetes-dashboard/dashboard-admin-sa.yaml`](/Users/sir/Desktop/Diplom/project/deploy/kubernetes-dashboard/dashboard-admin-sa.yaml)
+
+## Где обязательно заменить адреса
+
+Чтобы развёртывание не осталось жёстко привязанным к `45.139.78.241`, замени IP/host в этих файлах:
+
+### Frontend
+
+- [`app/frontend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/frontend/helm/values.yaml)
+
+Поля:
+
+- `runtimeConfig.apiBaseUrl`
+- `ingress.hosts[].host`
+- при включении TLS ещё и `ingress.tls`
+
+Сейчас там:
+
+- `http://api.45.139.78.241.nip.io/api`
+- `45.139.78.241.nip.io`
+
+### Backend
+
+- [`app/backend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/backend/helm/values.yaml)
+
+Поля:
+
+- `env.corsAllowedOrigins`
+- `env.frontendPasswordResetUrl`
+- `ingress.hosts[].host`
+- при включении TLS ещё и `ingress.tls`
+
+Сейчас там:
+
+- `http://45.139.78.241.nip.io`
+- `http://45.139.78.241.nip.io/reset-password`
+- `api.45.139.78.241.nip.io`
+
+### Grafana
+
+- [`monitoring/helm/grafana-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/grafana-values.yaml)
+
+Поля:
+
+- `ingress.hosts`
+- при необходимости `adminPassword`
+- при включении TLS ещё и `ingress.tls`
+
+Сейчас там:
+
+- `grafana.45.139.78.241.nip.io`
+
+## Что ещё нужно заполнить руками
+
+### Секреты
+
+- [`app/backend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/backend/helm/values.yaml)
+  - `secrets.jwtSecret`
+  - `secrets.springMailPassword`
+- [`database/postgres/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/database/postgres/helm/values.yaml)
+  - `database.password`
+- [`monitoring/helm/grafana-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/grafana-values.yaml)
+  - `adminPassword`
+
+  
+
+### Почта
+
+#### Всё что связано с постой на данный момент выключено, для тестирования так и оставить
+
+- [`app/backend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/backend/helm/values.yaml)
+  - `env.mailFrom`
+  - `env.springMailHost`
+  - `env.springMailPort`
+  - `env.springMailUsername`
+
+Если почта не нужна, оставляй `mailEnabled: false`.
+
+### Образы
+
+- [`app/backend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/backend/helm/values.yaml)
+  - `image.repository`
+  - `image.tag`
+- [`app/frontend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/frontend/helm/values.yaml)
+  - `image.repository`
+  - `image.tag`
+
+  актуальный образы уже стоят, рекомендуется не менять
+
+### Storage
+
+- [`database/postgres/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/database/postgres/helm/values.yaml)
+  - `persistence.size`
+  - `persistence.storageClass`
+- [`monitoring/helm/grafana-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/grafana-values.yaml)
+  - `persistence.size`
+- [`monitoring/helm/loki-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/loki-values.yaml)
+  - `singleBinary.persistence.size`
+- [`monitoring/helm/tempo-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/tempo-values.yaml)
+  - `persistence.size`
+- [`monitoring/helm/prometheus-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/prometheus-values.yaml)
+  - `server.persistentVolume.size`
+
+## Что важно знать
+
+- frontend ходит в backend по внешнему адресу, а не по внутреннему Kubernetes service DNS
+- backend подключается к postgres по service name `interview-coach-postgres:5432`
+- OTel Collector находится в namespace `monitoring`, поэтому backend использует полный DNS:
+  - `otel-collector.monitoring.svc.cluster.local:4318/v1/traces`
+- если меняешь только `ConfigMap`/`Secret` values, pod'ы могут не перезапуститься автоматически
+- для ручного перезапуска после изменения values:
+
+```bash
+kubectl rollout restart deploy/interview-coach-backend -n app
+kubectl rollout restart deploy/interview-coach-frontend -n app
+kubectl rollout restart statefulset/interview-coach-postgres -n app
+```
+
+## Grafana dashboards
+
+Готовые JSON для импорта:
+
+- [`monitoring/dashboards/application-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/application-overview.json)
+- [`monitoring/dashboards/platform-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/platform-overview.json)
+- [`monitoring/dashboards/logs-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/logs-overview.json)

@@ -75,3 +75,9 @@ kubectl get pods -n monitoring
 kubectl get svc -n monitoring
 kubectl get ingress -n monitoring
 ```
+
+Дашборды для импорта в Grafana:
+
+- `monitoring/dashboards/application-overview.json`
+- `monitoring/dashboards/platform-overview.json`
+- `monitoring/dashboards/logs-overview.json`
