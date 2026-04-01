@@ -36,6 +36,45 @@
 
 ## Установка
 
+### Один запуск для всего Helm-стека
+
+Для всего, что в репозитории разворачивается через Helm, теперь можно использовать один общий файл:
+
+```bash
+helmfile sync
+```
+
+или обёртку:
+
+```bash
+./scripts/deploy-all.sh
+```
+
+Что войдёт в этот запуск:
+
+- `ingress-nginx`
+- `postgres`
+- `backend`
+- `frontend`
+- `prometheus`
+- `loki`
+- `promtail`
+- `tempo`
+- `otel-collector`
+- `grafana`
+
+Файл оркестрации:
+
+- [`helmfile.yaml`](/Users/a.v.berezutskiy/Desktop/Dip/deploy/helmfile.yaml)
+
+Важно:
+
+- нужен установленный `helmfile`
+- перед первым запуском всё равно нужно заполнить секреты и хосты в `values.yaml`
+- `cert-manager` и `kubernetes-dashboard` сюда не включены, потому что в репозитории для них сейчас нет полноценного chart'а, только инструкции и манифесты
+
+Ниже оставлены отдельные команды, если захочешь ставить компоненты по одному.
+
 ### 1. ingress-nginx
 
 ```bash

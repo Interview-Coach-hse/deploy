@@ -1,0 +1,85 @@
+repositories:
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: open-telemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
+
+helmDefaults:
+  wait: true
+  timeout: 600
+  createNamespace: true
+
+releases:
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    chart: ./ingress-nginx/helm
+    values:
+      - ./ingress-nginx/helm/values.yaml
+
+  - name: postgres
+    namespace: app
+    chart: ./database/postgres/helm
+    values:
+      - ./database/postgres/helm/values.yaml
+
+  - name: backend
+    namespace: app
+    chart: ./app/backend/helm
+    needs:
+      - app/postgres
+      - ingress-nginx/ingress-nginx
+    values:
+      - ./app/backend/helm/values.yaml
+
+  - name: frontend
+    namespace: app
+    chart: ./app/frontend/helm
+    needs:
+      - app/backend
+      - ingress-nginx/ingress-nginx
+    values:
+      - ./app/frontend/helm/values.yaml
+
+  - name: prometheus
+    namespace: monitoring
+    chart: prometheus-community/prometheus
+    values:
+      - ./monitoring/helm/prometheus-values.yaml
+
+  - name: loki
+    namespace: monitoring
+    chart: grafana/loki
+    values:
+      - ./monitoring/helm/loki-values.yaml
+
+  - name: promtail
+    namespace: monitoring
+    chart: grafana/promtail
+    needs:
+      - monitoring/loki
+    values:
+      - ./monitoring/helm/promtail-values.yaml
+
+  - name: tempo
+    namespace: monitoring
+    chart: grafana/tempo
+    values:
+      - ./monitoring/helm/tempo-values.yaml
+
+  - name: otel-collector
+    namespace: monitoring
+    chart: open-telemetry/opentelemetry-collector
+    values:
+      - ./monitoring/helm/otel-collector-values.yaml
+
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    needs:
+      - monitoring/prometheus
+      - monitoring/loki
+      - monitoring/tempo
+    values:
+      - ./monitoring/helm/grafana-values.yaml

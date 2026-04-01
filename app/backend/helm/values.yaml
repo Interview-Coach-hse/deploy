@@ -21,12 +21,12 @@ env:
   jwtRefreshTokenDays: 7
   emailVerificationExpirationMinutes: 15
   emailVerificationMaxAttempts: 5
-  corsAllowedOrigins: http://45.139.78.241.nip.io
+  corsAllowedOrigins: http://147.45.100.55.nip.io
   mailEnabled: false
   mailFrom: no-reply@interview-coach.example.com
   mailVerificationSubject: Interview Coach email verification
   mailResetSubject: Interview Coach password reset
-  frontendPasswordResetUrl: http://45.139.78.241.nip.io/reset-password
+  frontendPasswordResetUrl: http://147.45.100.55.nip.io/reset-password
   springMailHost: smtp.gmail.com
   springMailPort: 587
   springMailUsername: no-reply@interview-coach.example.com
@@ -68,7 +68,7 @@ ingress:
   className: nginx
   annotations: {}
   hosts:
-    - host: api.45.139.78.241.nip.io
+    - host: api.147.45.100.55.nip.io
       paths:
         - path: /
           pathType: Prefix

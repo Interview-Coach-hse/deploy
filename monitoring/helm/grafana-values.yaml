@@ -46,7 +46,7 @@ ingress:
   ingressClassName: nginx
   annotations: {}
   hosts:
-    - grafana.45.139.78.241.nip.io
+    - grafana.147.45.100.55.nip.io
   path: /
   pathType: Prefix
   tls: []

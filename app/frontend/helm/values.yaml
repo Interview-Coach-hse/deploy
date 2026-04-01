@@ -11,7 +11,7 @@ image:
 imagePullSecrets: []
 
 runtimeConfig:
-  apiBaseUrl: http://api.45.139.78.241.nip.io/api
+  apiBaseUrl: http://api.147.45.100.55.nip.io/api
 
 service:
   type: ClusterIP
@@ -22,7 +22,7 @@ ingress:
   className: nginx
   annotations: {}
   hosts:
-    - host: 45.139.78.241.nip.io
+    - host: 147.45.100.55.nip.io
       paths:
         - path: /
           pathType: Prefix
