@@ -44,9 +44,14 @@ datasources:
 ingress:
   enabled: true
   ingressClassName: nginx
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - grafana.interview-coach.ru
   path: /
   pathType: Prefix
-  tls: []
+  tls:
+    - hosts:
+        - grafana.interview-coach.ru
+      secretName: grafana-tls
