@@ -33,8 +33,11 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            app:
-              - 'app/**'
+            frontend:
+              - 'app/frontend/**'
+            backend:
+              - 'app/backend/**'
+            postgres:
               - 'database/**'
             infra:
               - 'ingress-nginx/**'
@@ -58,7 +61,9 @@ jobs:
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.0
         env:
-          CHANGED_APP: ${{ steps.changes.outputs.app }}
+          CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
+          CHANGED_BACKEND: ${{ steps.changes.outputs.backend }}
+          CHANGED_POSTGRES: ${{ steps.changes.outputs.postgres }}
           CHANGED_INFRA: ${{ steps.changes.outputs.infra }}
           CHANGED_MONITORING: ${{ steps.changes.outputs.monitoring }}
           CHANGED_ALL: ${{ steps.changes.outputs.all }}
@@ -68,7 +73,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
-          envs: CHANGED_APP,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
+          envs: CHANGED_FRONTEND,CHANGED_BACKEND,CHANGED_POSTGRES,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
           script: |
             set -euo pipefail
             cd ~/project/deploy
@@ -86,8 +91,16 @@ jobs:
               helmfile -l stack=infra sync
             fi
 
-            if [ "${CHANGED_APP}" = "true" ]; then
-              helmfile -l stack=app sync
+            if [ "${CHANGED_POSTGRES}" = "true" ]; then
+              helmfile -l app=postgres sync
+            fi
+
+            if [ "${CHANGED_BACKEND}" = "true" ]; then
+              helmfile -l app=backend sync
+            fi
+
+            if [ "${CHANGED_FRONTEND}" = "true" ]; then
+              helmfile -l app=frontend sync
             fi
 
             if [ "${CHANGED_MONITORING}" = "true" ]; then

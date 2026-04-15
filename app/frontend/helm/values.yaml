@@ -8,7 +8,8 @@ image:
   tag: main-3-375abd3
   pullPolicy: IfNotPresent
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: dockerhub-pull-secret
 
 runtimeConfig:
   apiBaseUrl: http://api.interview-coach.ru/api
