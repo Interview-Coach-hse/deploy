@@ -281,3 +281,6 @@ kubectl rollout restart statefulset/interview-coach-postgres -n app
 - [`monitoring/dashboards/application-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/application-overview.json)
 - [`monitoring/dashboards/platform-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/platform-overview.json)
 - [`monitoring/dashboards/logs-overview.json`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/dashboards/logs-overview.json)
+
+
+docker buildx build --platform linux/amd64 -t sirlazybone/interview-backend:0.1.5 --push .
