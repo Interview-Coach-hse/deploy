@@ -25,14 +25,14 @@ env:
   emailVerificationExpirationMinutes: 15
   emailVerificationMaxAttempts: 5
   corsAllowedOrigins: https://interview-coach.ru
-  mailEnabled: false
-  mailFrom: no-reply@interview-coach.example.com
+  mailEnabled: true
+  mailFrom: interview-coach@inbox.ru
   mailVerificationSubject: Interview Coach email verification
   mailResetSubject: Interview Coach password reset
   frontendPasswordResetUrl: https://interview-coach.ru/reset-password
-  springMailHost: smtp.gmail.com
-  springMailPort: 587
-  springMailUsername: no-reply@interview-coach.example.com
+  springMailHost: smtp.mail.ru
+  springMailPort: 465
+  springMailUsername: interview-coach@inbox.ru
   springMailSmtpAuth: true
   springMailSmtpStarttls: true
   managementTracingSamplingProbability: "1.0"
@@ -47,7 +47,7 @@ env:
 
 secrets:
   jwtSecret: change-me-very-long-random-jwt-secret
-  springMailPassword: change-me-mail-password
+  springMailPassword: CyjV3xr8yc02QrhxJNdL
 
 database:
   host: interview-coach-postgres
