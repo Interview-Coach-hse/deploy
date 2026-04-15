@@ -12,7 +12,7 @@ imagePullSecrets:
   - name: dockerhub-pull-secret
 
 runtimeConfig:
-  apiBaseUrl: http://api.interview-coach.ru/api
+  apiBaseUrl: https://api.interview-coach.ru/api
 
 service:
   type: ClusterIP
@@ -21,13 +21,18 @@ service:
 ingress:
   enabled: true
   className: nginx
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: interview-coach.ru
       paths:
         - path: /
           pathType: Prefix
-  tls: {}
+  tls:
+    - hosts:
+        - interview-coach.ru
+      secretName: interview-coach-frontend-tls
 
 resources:
   requests:

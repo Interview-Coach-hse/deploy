@@ -24,12 +24,12 @@ env:
   jwtRefreshTokenDays: 7
   emailVerificationExpirationMinutes: 15
   emailVerificationMaxAttempts: 5
-  corsAllowedOrigins: http://interview-coach.ru
+  corsAllowedOrigins: https://interview-coach.ru
   mailEnabled: false
   mailFrom: no-reply@interview-coach.example.com
   mailVerificationSubject: Interview Coach email verification
   mailResetSubject: Interview Coach password reset
-  frontendPasswordResetUrl: http://interview-coach.ru/reset-password
+  frontendPasswordResetUrl: https://interview-coach.ru/reset-password
   springMailHost: smtp.gmail.com
   springMailPort: 587
   springMailUsername: no-reply@interview-coach.example.com
@@ -69,12 +69,15 @@ probes:
 ingress:
   enabled: true
   className: nginx
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: api.interview-coach.ru
       paths:
         - path: /
           pathType: Prefix
-  # TLS intentionally disabled for the initial bring-up.
-  # Uncomment and fill in real values after cert-manager/issuer/certificates are ready.
-  tls: []
+  tls:
+    - hosts:
+        - api.interview-coach.ru
+      secretName: interview-coach-backend-tls

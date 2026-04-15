@@ -7,6 +7,7 @@ on:
     paths:
       - "helmfile.yaml"
       - "app/**"
+      - "cert-manager/**"
       - "database/**"
       - "ingress-nginx/**"
       - "monitoring/**"
@@ -37,6 +38,8 @@ jobs:
               - 'app/frontend/**'
             backend:
               - 'app/backend/**'
+            certmanager:
+              - 'cert-manager/**'
             postgres:
               - 'database/**'
             infra:
@@ -63,6 +66,7 @@ jobs:
         env:
           CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
           CHANGED_BACKEND: ${{ steps.changes.outputs.backend }}
+          CHANGED_CERTMANAGER: ${{ steps.changes.outputs.certmanager }}
           CHANGED_POSTGRES: ${{ steps.changes.outputs.postgres }}
           CHANGED_INFRA: ${{ steps.changes.outputs.infra }}
           CHANGED_MONITORING: ${{ steps.changes.outputs.monitoring }}
@@ -73,7 +77,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
-          envs: CHANGED_FRONTEND,CHANGED_BACKEND,CHANGED_POSTGRES,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
+          envs: CHANGED_FRONTEND,CHANGED_BACKEND,CHANGED_CERTMANAGER,CHANGED_POSTGRES,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
           script: |
             set -euo pipefail
             cd ~/project/deploy
@@ -84,11 +88,13 @@ jobs:
             helmfile version
             if [ "${CHANGED_ALL}" = "true" ]; then
               helmfile sync
+              kubectl apply -f ./cert-manager/cluster-issuer.yaml
               exit 0
             fi
 
-            if [ "${CHANGED_INFRA}" = "true" ]; then
+            if [ "${CHANGED_INFRA}" = "true" ] || [ "${CHANGED_CERTMANAGER}" = "true" ]; then
               helmfile -l stack=infra sync
+              kubectl apply -f ./cert-manager/cluster-issuer.yaml
             fi
 
             if [ "${CHANGED_POSTGRES}" = "true" ]; then
