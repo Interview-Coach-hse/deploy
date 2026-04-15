@@ -14,18 +14,27 @@ helmDefaults:
 releases:
   - name: ingress-nginx
     namespace: ingress-nginx
+    labels:
+      stack: infra
+      app: ingress-nginx
     chart: ./ingress-nginx/helm
     values:
       - ./ingress-nginx/helm/values.yaml
 
   - name: postgres
     namespace: app
+    labels:
+      stack: app
+      app: postgres
     chart: ./database/postgres/helm
     values:
       - ./database/postgres/helm/values.yaml
 
   - name: backend
     namespace: app
+    labels:
+      stack: app
+      app: backend
     chart: ./app/backend/helm
     needs:
       - app/postgres
@@ -35,6 +44,9 @@ releases:
 
   - name: frontend
     namespace: app
+    labels:
+      stack: app
+      app: frontend
     chart: ./app/frontend/helm
     needs:
       - app/backend
@@ -44,18 +56,27 @@ releases:
 
   - name: prometheus
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: prometheus
     chart: prometheus-community/prometheus
     values:
       - ./monitoring/helm/prometheus-values.yaml
 
   - name: loki
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: loki
     chart: grafana/loki
     values:
       - ./monitoring/helm/loki-values.yaml
 
   - name: promtail
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: promtail
     chart: grafana/promtail
     needs:
       - monitoring/loki
@@ -64,18 +85,27 @@ releases:
 
   - name: tempo
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: tempo
     chart: grafana/tempo
     values:
       - ./monitoring/helm/tempo-values.yaml
 
   - name: otel-collector
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: otel-collector
     chart: open-telemetry/opentelemetry-collector
     values:
       - ./monitoring/helm/otel-collector-values.yaml
 
   - name: grafana
     namespace: monitoring
+    labels:
+      stack: monitoring
+      app: grafana
     chart: grafana/grafana
     needs:
       - monitoring/prometheus

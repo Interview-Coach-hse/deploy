@@ -25,6 +25,24 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changed stacks
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'app/**'
+              - 'database/**'
+            infra:
+              - 'ingress-nginx/**'
+            monitoring:
+              - 'monitoring/**'
+            all:
+              - 'helmfile.yaml'
+
       - name: Validate GitHub secrets
         shell: bash
         run: |
@@ -39,12 +57,18 @@ jobs:
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          CHANGED_APP: ${{ steps.changes.outputs.app }}
+          CHANGED_INFRA: ${{ steps.changes.outputs.infra }}
+          CHANGED_MONITORING: ${{ steps.changes.outputs.monitoring }}
+          CHANGED_ALL: ${{ steps.changes.outputs.all }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
+          envs: CHANGED_APP,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
           script: |
             set -euo pipefail
             cd ~/project/deploy
@@ -53,4 +77,19 @@ jobs:
             git pull --ff-only origin main
             helm version
             helmfile version
-            helmfile sync
+            if [ "${CHANGED_ALL}" = "true" ]; then
+              helmfile sync
+              exit 0
+            fi
+
+            if [ "${CHANGED_INFRA}" = "true" ]; then
+              helmfile -l stack=infra sync
+            fi
+
+            if [ "${CHANGED_APP}" = "true" ]; then
+              helmfile -l stack=app sync
+            fi
+
+            if [ "${CHANGED_MONITORING}" = "true" ]; then
+              helmfile -l stack=monitoring sync
+            fi
