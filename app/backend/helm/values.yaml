@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: sirlazybone/interview-backend
-  tag: 0.1.4
+  tag: 0.1.5
   pullPolicy: IfNotPresent
 
 service:
