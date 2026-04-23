@@ -41,9 +41,10 @@ env:
   assessmentBaseUrl: http://89.124.115.112:8000
   assessmentApiKey: analysis_live_c4TqWC7cRPZ_FOlQ6MI5n9XWI-RCY01f_ZU977unzrY
   assessmentClientId: main-backend
+  assessmentMetadataSource: main-backend
   assessmentMode: sync
   assessmentQuestionLimit: 20
-  assessmentReportAtempts: 20
+  assessmentReportAttempts: 20
   assessmentPollDelayMillis: 120000
   assessmentCircuitBreakerFailureThreshold: 3
   assessmentCircuitBreakerOpenDuration: 60
