@@ -28,8 +28,13 @@ data:
   MANAGEMENT_OTLP_TRACING_ENDPOINT: {{ .Values.env.managementOtlpTracingEndpoint | quote }}
   APP_ASSESSMENT_ENABLED: {{ .Values.env.assessmentEnabled | quote }}
   APP_ASSESSMENT_BASE_URL: {{ .Values.env.assessmentBaseUrl | quote }}
+  APP_ASSESSMENT_API_KEY: {{ .Values.env.assessmentApiKey | quote }}
   APP_ASSESSMENT_CLIENT_ID: {{ .Values.env.assessmentClientId | quote }}
   APP_ASSESSMENT_MODE: {{ .Values.env.assessmentMode | quote }}
   APP_ASSESSMENT_QUESTION_LIMIT: {{ .Values.env.assessmentQuestionLimit | quote }}
+  APP_ASSESSMENT_REPORT_POLL_ATTEMPTS: {{ .Values.env.assessmentReportAtempts | quote }}
+  APP_ASSESSMENT_REPORT_POLL_DELAY_MILLIS: {{ .Values.env.assessmentPollDelayMillis | quote }}
+  APP_ASSESSMENT_CIRCUIT_BREAKER_FAILURE_THRESHOLD: {{ .Values.env.assessmentCircuitBreakerFailureThreshold }}
+  APP_ASSESSMENT_CIRCUIT_BREAKER_OPEN_DURATION_SECONDS: {{ .Values.env.assessmentCircuitBreakerOpenDuration }}
   APP_ASSESSMENT_REPORT_LANGUAGE: {{ .Values.env.assessmentReportLanguage | quote }}
   APP_ASSESSMENT_SUBSCRIPTION_PLAN: {{ .Values.env.assessmentSubscriptionPlan | quote }}

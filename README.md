@@ -52,7 +52,6 @@ helmfile sync
 
 Что войдёт в этот запуск:
 
-- `cert-manager`
 - `ingress-nginx`
 - `postgres`
 - `backend`
@@ -72,7 +71,7 @@ helmfile sync
 
 - нужен установленный `helmfile`
 - перед первым запуском всё равно нужно заполнить секреты и хосты в `values.yaml`
-- `kubernetes-dashboard` сюда не включён, потому что в репозитории для него сейчас нет полноценного chart'а, только инструкции и манифесты
+- `cert-manager` и `kubernetes-dashboard` сюда не включены, потому что в репозитории для них сейчас нет полноценного chart'а, только инструкции и манифесты
 
 Ниже оставлены отдельные команды, если захочешь ставить компоненты по одному.
 
@@ -285,3 +284,6 @@ kubectl rollout restart statefulset/interview-coach-postgres -n app
 
 
 docker buildx build --platform linux/amd64 -t sirlazybone/interview-backend:0.1.5 --push .
+
+docker buildx build --platform linux/amd64 -t sirlazybone/interview-frontend:0.1.5 --push .
+
