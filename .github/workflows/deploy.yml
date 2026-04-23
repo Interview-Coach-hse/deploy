@@ -81,9 +81,9 @@ jobs:
           script: |
             set -euo pipefail
             cd ~/project/deploy
-            git fetch origin
+            git fetch --prune origin
             git checkout main
-            git pull --ff-only origin main
+            git reset --hard origin/main
             helm version
             helmfile version
             if [ "${CHANGED_ALL}" = "true" ]; then
