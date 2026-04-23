@@ -39,7 +39,7 @@ env:
   managementOtlpTracingEndpoint: http://otel-collector.monitoring.svc.cluster.local:4318/v1/traces
   assessmentEnabled: true
   assessmentBaseUrl: http://89.124.115.112:8000
-  assessmentApiKey: analysis_live_c4TqWC7cRPZ_FOlQ6MI5n9XWI-RCY01f_ZU977unzrY
+  assessmentApiKey: demo-api-key
   assessmentClientId: main-backend
   assessmentMetadataSource: main-backend
   assessmentMode: sync
