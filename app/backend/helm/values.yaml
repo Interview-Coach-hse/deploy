@@ -42,7 +42,7 @@ env:
   assessmentApiKey: demo-api-key
   assessmentClientId: main-backend
   assessmentMetadataSource: main-backend
-  assessmentMode: sync
+  assessmentMode: async
   assessmentQuestionLimit: 20
   assessmentReportAttempts: 20
   assessmentPollDelayMillis: 120000
