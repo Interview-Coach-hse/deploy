@@ -53,7 +53,7 @@ env:
 
 secrets:
   jwtSecret: change-me-very-long-random-jwt-secret
-  springMailPassword: CyjV3xr8yc02QrhxJNdL
+  springMailPassword: wphi rqbg vajb osgl
 
 database:
   host: interview-coach-postgres
