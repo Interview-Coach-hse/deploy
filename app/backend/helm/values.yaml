@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: sirlazybone/interview-backend
-  tag: main-23-ce68d8a
+  tag: main-22-04b9e8d
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -26,13 +26,13 @@ env:
   emailVerificationMaxAttempts: 5
   corsAllowedOrigins: https://interview-coach.ru
   mailEnabled: true
-  mailFrom: interview-coach@inbox.ru
+  mailFrom: andberezutsky@gmail.com
   mailVerificationSubject: Interview Coach email verification
   mailResetSubject: Interview Coach password reset
   frontendPasswordResetUrl: https://interview-coach.ru/reset-password
-  springMailHost: smtp.mail.ru
-  springMailPort: 465
-  springMailUsername: interview-coach@inbox.ru
+  springMailHost: smtp.gmail.ru
+  springMailPort: 587
+  springMailUsername: andberezutsky@gmail.com
   springMailSmtpAuth: true
   springMailSmtpStarttls: true
   managementTracingSamplingProbability: "1.0"
