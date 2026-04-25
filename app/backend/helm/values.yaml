@@ -30,7 +30,7 @@ env:
   mailVerificationSubject: Interview Coach email verification
   mailResetSubject: Interview Coach password reset
   frontendPasswordResetUrl: https://interview-coach.ru/reset-password
-  springMailHost: smtp.gmail.ru
+  springMailHost: smtp.gmail.com
   springMailPort: 587
   springMailUsername: andberezutsky@gmail.com
   springMailSmtpAuth: true
