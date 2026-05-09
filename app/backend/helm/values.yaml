@@ -38,7 +38,7 @@ env:
   managementTracingSamplingProbability: "1.0"
   managementOtlpTracingEndpoint: http://otel-collector.monitoring.svc.cluster.local:4318/v1/traces
   assessmentEnabled: true
-  assessmentBaseUrl: http://89.124.115.112:8000
+  assessmentBaseUrl: https://daringly-ammonium-shank.ngrok-free.dev
   assessmentApiKey: demo-api-key
   assessmentClientId: main-backend
   assessmentMetadataSource: main-backend
