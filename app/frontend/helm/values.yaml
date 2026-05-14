@@ -5,7 +5,7 @@ replicaCount: 2
 
 image:
   repository: sirlazybone/interview-frontend
-  tag: main-27-ac819cc
+  tag: main-28-ffe5d98
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
