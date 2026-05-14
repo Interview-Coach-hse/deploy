@@ -12,6 +12,8 @@
 - `monitoring/dashboards` - готовые Grafana dashboard JSON
 - `kubernetes-dashboard` - Helm install notes и admin service account для Kubernetes Dashboard
 - `cert-manager` - заметки по cert-manager
+- `vault` - values и заметки по HashiCorp Vault
+- `external-secrets` - оператор и конфигурация интеграции Vault -> Kubernetes Secret
 - `app/bot`, `app/worker` - заготовки под будущие сервисы
 
 ## Namespace'ы
@@ -21,6 +23,8 @@
 - `ingress-nginx` - ingress controller
 - `app` - frontend, backend, postgres
 - `monitoring` - Prometheus, Grafana, Loki, Promtail, Tempo, OTel Collector
+- `vault` - Vault
+- `external-secrets` - External Secrets Operator
 - `kubernetes-dashboard` - Kubernetes Dashboard
 
 ## Актуальные адреса
@@ -52,6 +56,8 @@ helmfile sync
 
 Что войдёт в этот запуск:
 
+- `vault`
+- `external-secrets`
 - `ingress-nginx`
 - `postgres`
 - `backend`
@@ -70,7 +76,8 @@ helmfile sync
 Важно:
 
 - нужен установленный `helmfile`
-- перед первым запуском всё равно нужно заполнить секреты и хосты в `values.yaml`
+- перед первым запуском всё равно нужно заполнить хосты в `values.yaml`
+- если используешь Vault, секреты в `app/backend/helm/values.yaml` и `database/postgres/helm/values.yaml` больше не заполняются вручную
 - `cert-manager` и `kubernetes-dashboard` сюда не включены, потому что в репозитории для них сейчас нет полноценного chart'а, только инструкции и манифесты
 
 Ниже оставлены отдельные команды, если захочешь ставить компоненты по одному.
@@ -84,7 +91,20 @@ helm upgrade --install ingress-nginx ./ingress-nginx/helm \
   -f ./ingress-nginx/helm/values.yaml
 ```
 
-### 2. PostgreSQL
+### 2. Vault
+
+```bash
+helmfile -l app=vault sync
+```
+
+### 3. External Secrets
+
+```bash
+helmfile -l app=external-secrets sync
+helmfile -l app=external-secrets-config sync
+```
+
+### 4. PostgreSQL
 
 ```bash
 helm upgrade --install postgres ./database/postgres/helm \
@@ -93,7 +113,7 @@ helm upgrade --install postgres ./database/postgres/helm \
   -f ./database/postgres/helm/values.yaml
 ```
 
-### 3. Backend
+### 5. Backend
 
 ```bash
 helm upgrade --install backend ./app/backend/helm \
@@ -101,7 +121,7 @@ helm upgrade --install backend ./app/backend/helm \
   -f ./app/backend/helm/values.yaml
 ```
 
-### 4. Frontend
+### 6. Frontend
 
 ```bash
 helm upgrade --install frontend ./app/frontend/helm \
@@ -109,7 +129,7 @@ helm upgrade --install frontend ./app/frontend/helm \
   -f ./app/frontend/helm/values.yaml
 ```
 
-### 5. Monitoring
+### 7. Monitoring
 
 Команды и values лежат в:
 
@@ -151,7 +171,7 @@ helm upgrade --install grafana grafana/grafana \
   -f ./monitoring/helm/grafana-values.yaml
 ```
 
-### 6. Kubernetes Dashboard
+### 8. Kubernetes Dashboard
 
 Инструкции и admin service account:
 
@@ -212,11 +232,82 @@ helm upgrade --install grafana grafana/grafana \
 
 ### Секреты
 
+При текущей конфигурации секреты должны жить в Vault, а не в Git. `values.yaml` теперь хранит только не-секретные настройки и mapping до путей Vault.
+
+#### Что хранить в Vault
+
+- `secret/interview-coach/backend`
+  - `APP_SECURITY_JWT_SECRET`
+  - `SPRING_MAIL_PASSWORD`
+- `secret/interview-coach/postgres`
+  - `POSTGRES_DB`
+  - `POSTGRES_USER`
+  - `POSTGRES_PASSWORD`
+
+#### Инициализация Vault
+
+После установки релиза `vault`:
+
+```bash
+kubectl exec -n vault vault-0 -- vault operator init
+kubectl exec -n vault vault-0 -- vault operator unseal
+kubectl exec -n vault vault-0 -- vault login
+kubectl exec -n vault vault-0 -- vault secrets enable -path=secret kv-v2
+kubectl exec -n vault vault-0 -- vault auth enable kubernetes
+```
+
+#### Загрузка секретов в Vault
+
+```bash
+kubectl exec -n vault vault-0 -- vault kv put secret/interview-coach/backend \
+  APP_SECURITY_JWT_SECRET="replace-me" \
+  SPRING_MAIL_PASSWORD="replace-me"
+
+kubectl exec -n vault vault-0 -- vault kv put secret/interview-coach/postgres \
+  POSTGRES_DB="interview_coach" \
+  POSTGRES_USER="interview_coach" \
+  POSTGRES_PASSWORD="replace-me"
+```
+
+#### Policy и role для External Secrets Operator
+
+Сначала настрой Kubernetes auth внутри Vault:
+
+```bash
+export SA_TOKEN="$(kubectl create token -n external-secrets external-secrets)"
+export SA_CA_CRT="$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 --decode)"
+export K8S_HOST="$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.server}')"
+```
+
+```bash
+kubectl exec -i -n vault vault-0 -- vault write auth/kubernetes/config \
+  token_reviewer_jwt="$SA_TOKEN" \
+  kubernetes_host="$K8S_HOST" \
+  kubernetes_ca_cert="$SA_CA_CRT"
+```
+
+Создай policy:
+
+```bash
+cat <<'EOF' >/tmp/external-secrets-policy.hcl
+path "secret/data/interview-coach/*" {
+  capabilities = ["read"]
+}
+EOF
+
+kubectl cp /tmp/external-secrets-policy.hcl vault/vault-0:/tmp/external-secrets-policy.hcl
+kubectl exec -n vault vault-0 -- vault policy write external-secrets /tmp/external-secrets-policy.hcl
+kubectl exec -n vault vault-0 -- vault write auth/kubernetes/role/external-secrets \
+  bound_service_account_names=external-secrets \
+  bound_service_account_namespaces=external-secrets \
+  policies=external-secrets \
+  ttl=1h
+```
+
 - [`app/backend/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/app/backend/helm/values.yaml)
-  - `secrets.jwtSecret`
-  - `secrets.springMailPassword`
+  - `externalSecrets.data`
 - [`database/postgres/helm/values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/database/postgres/helm/values.yaml)
-  - `database.password`
+  - `externalSecrets.data`
 - [`monitoring/helm/grafana-values.yaml`](/Users/sir/Desktop/Diplom/project/deploy/monitoring/helm/grafana-values.yaml)
   - `adminPassword`
 
@@ -286,4 +377,3 @@ kubectl rollout restart statefulset/interview-coach-postgres -n app
 docker buildx build --platform linux/amd64 -t sirlazybone/interview-backend:0.1.5 --push .
 
 docker buildx build --platform linux/amd64 -t sirlazybone/interview-frontend:0.1.5 --push .
-

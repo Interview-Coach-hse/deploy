@@ -9,8 +9,10 @@ on:
       - "app/**"
       - "cert-manager/**"
       - "database/**"
+      - "external-secrets/**"
       - "ingress-nginx/**"
       - "monitoring/**"
+      - "vault/**"
   workflow_dispatch:
 
 concurrency:
@@ -40,12 +42,16 @@ jobs:
               - 'app/backend/**'
             certmanager:
               - 'cert-manager/**'
+            external_secrets:
+              - 'external-secrets/**'
             postgres:
               - 'database/**'
             infra:
               - 'ingress-nginx/**'
             monitoring:
               - 'monitoring/**'
+            vault:
+              - 'vault/**'
             all:
               - 'helmfile.yaml'
 
@@ -67,9 +73,11 @@ jobs:
           CHANGED_FRONTEND: ${{ steps.changes.outputs.frontend }}
           CHANGED_BACKEND: ${{ steps.changes.outputs.backend }}
           CHANGED_CERTMANAGER: ${{ steps.changes.outputs.certmanager }}
+          CHANGED_EXTERNAL_SECRETS: ${{ steps.changes.outputs.external_secrets }}
           CHANGED_POSTGRES: ${{ steps.changes.outputs.postgres }}
           CHANGED_INFRA: ${{ steps.changes.outputs.infra }}
           CHANGED_MONITORING: ${{ steps.changes.outputs.monitoring }}
+          CHANGED_VAULT: ${{ steps.changes.outputs.vault }}
           CHANGED_ALL: ${{ steps.changes.outputs.all }}
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -77,7 +85,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
-          envs: CHANGED_FRONTEND,CHANGED_BACKEND,CHANGED_CERTMANAGER,CHANGED_POSTGRES,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_ALL
+          envs: CHANGED_FRONTEND,CHANGED_BACKEND,CHANGED_CERTMANAGER,CHANGED_EXTERNAL_SECRETS,CHANGED_POSTGRES,CHANGED_INFRA,CHANGED_MONITORING,CHANGED_VAULT,CHANGED_ALL
           script: |
             set -euo pipefail
             cd ~/project/deploy
@@ -95,6 +103,15 @@ jobs:
             if [ "${CHANGED_INFRA}" = "true" ] || [ "${CHANGED_CERTMANAGER}" = "true" ]; then
               helmfile -l stack=infra sync
               kubectl apply -f ./cert-manager/cluster-issuer.yaml
+            fi
+
+            if [ "${CHANGED_VAULT}" = "true" ]; then
+              helmfile -l app=vault sync
+            fi
+
+            if [ "${CHANGED_EXTERNAL_SECRETS}" = "true" ]; then
+              helmfile -l app=external-secrets sync
+              helmfile -l app=external-secrets-config sync
             fi
 
             if [ "${CHANGED_POSTGRES}" = "true" ]; then

@@ -1,0 +1,11 @@
+secretStore:
+  name: vault-backend
+  vault:
+    server: http://vault.vault.svc.cluster.local:8200
+    path: secret
+    version: v2
+    kubernetesMountPath: kubernetes
+    role: external-secrets
+    serviceAccount:
+      name: external-secrets
+      namespace: external-secrets

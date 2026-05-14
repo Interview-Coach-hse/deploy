@@ -1,4 +1,8 @@
 repositories:
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
+  - name: external-secrets
+    url: https://charts.external-secrets.io
   - name: jetstack
     url: https://charts.jetstack.io
   - name: prometheus-community
@@ -14,6 +18,38 @@ helmDefaults:
   createNamespace: true
 
 releases:
+  - name: vault
+    namespace: vault
+    labels:
+      stack: infra
+      app: vault
+    chart: hashicorp/vault
+    values:
+      - ./vault/values.yaml
+
+  - name: external-secrets
+    namespace: external-secrets
+    labels:
+      stack: infra
+      app: external-secrets
+    chart: external-secrets/external-secrets
+    needs:
+      - vault/vault
+    values:
+      - ./external-secrets/values.yaml
+
+  - name: external-secrets-config
+    namespace: external-secrets
+    labels:
+      stack: infra
+      app: external-secrets-config
+    chart: ./external-secrets/helm
+    needs:
+      - external-secrets/external-secrets
+      - vault/vault
+    values:
+      - ./external-secrets/helm/values.yaml
+
   - name: cert-manager
     namespace: cert-manager
     labels:
@@ -38,6 +74,8 @@ releases:
       stack: app
       app: postgres
     chart: ./database/postgres/helm
+    needs:
+      - external-secrets/external-secrets
     values:
       - ./database/postgres/helm/values.yaml
 
@@ -49,6 +87,7 @@ releases:
     chart: ./app/backend/helm
     needs:
       - app/postgres
+      - external-secrets/external-secrets
       - ingress-nginx/ingress-nginx
     values:
       - ./app/backend/helm/values.yaml

@@ -52,15 +52,37 @@ env:
   assessmentSubscriptionPlan: start
 
 secrets:
-  jwtSecret: change-me-very-long-random-jwt-secret
-  springMailPassword: wphi rqbg vajb osgl
+  create: false
+  jwtSecret: ""
+  springMailPassword: ""
+
+externalSecrets:
+  enabled: true
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  targetSecretName: ""
+  data:
+    - secretKey: APP_SECURITY_JWT_SECRET
+      remoteRef:
+        key: interview-coach/backend
+        property: APP_SECURITY_JWT_SECRET
+    - secretKey: SPRING_DATASOURCE_PASSWORD
+      remoteRef:
+        key: interview-coach/postgres
+        property: POSTGRES_PASSWORD
+    - secretKey: SPRING_MAIL_PASSWORD
+      remoteRef:
+        key: interview-coach/backend
+        property: SPRING_MAIL_PASSWORD
 
 database:
   host: interview-coach-postgres
   port: 5432
   name: interview_coach
   username: interview_coach
-  password: interview_coach
+  password: ""
 
 probes:
   readiness:

@@ -1,0 +1,9 @@
+installCRDs: true
+
+serviceAccount:
+  create: true
+  name: external-secrets
+
+leaderElect: true
+
+resources: {}

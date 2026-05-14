@@ -12,7 +12,31 @@ service:
 database:
   name: interview_coach
   username: interview_coach
-  password: interview_coach
+  password: ""
+
+secrets:
+  create: false
+
+externalSecrets:
+  enabled: true
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  targetSecretName: ""
+  data:
+    - secretKey: POSTGRES_DB
+      remoteRef:
+        key: interview-coach/postgres
+        property: POSTGRES_DB
+    - secretKey: POSTGRES_USER
+      remoteRef:
+        key: interview-coach/postgres
+        property: POSTGRES_USER
+    - secretKey: POSTGRES_PASSWORD
+      remoteRef:
+        key: interview-coach/postgres
+        property: POSTGRES_PASSWORD
 
 resources: {}
 

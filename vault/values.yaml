@@ -1,0 +1,24 @@
+server:
+  enabled: true
+  standalone:
+    enabled: true
+  ha:
+    enabled: false
+  dataStorage:
+    enabled: true
+    size: 2Gi
+    storageClass: ""
+  auditStorage:
+    enabled: false
+  resources: {}
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+
+ui:
+  enabled: true
+  serviceType: ClusterIP
+
+injector:
+  enabled: false
