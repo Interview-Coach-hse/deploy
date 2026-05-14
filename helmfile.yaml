@@ -1,6 +1,4 @@
 repositories:
-  - name: hashicorp
-    url: https://helm.releases.hashicorp.com
   - name: external-secrets
     url: https://charts.external-secrets.io
   - name: jetstack
@@ -23,7 +21,7 @@ releases:
     labels:
       stack: infra
       app: vault
-    chart: hashicorp/vault
+    chart: ./vault/helm
     values:
       - ./vault/values.yaml
 

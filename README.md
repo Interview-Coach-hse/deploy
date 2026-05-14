@@ -12,7 +12,7 @@
 - `monitoring/dashboards` - готовые Grafana dashboard JSON
 - `kubernetes-dashboard` - Helm install notes и admin service account для Kubernetes Dashboard
 - `cert-manager` - заметки по cert-manager
-- `vault` - values и заметки по HashiCorp Vault
+- `vault` - локальный Helm chart и заметки по HashiCorp Vault
 - `external-secrets` - оператор и конфигурация интеграции Vault -> Kubernetes Secret
 - `app/bot`, `app/worker` - заготовки под будущие сервисы
 

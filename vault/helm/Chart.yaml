@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vault
+description: Minimal single-node Vault chart for this cluster
+type: application
+version: 0.1.0
+appVersion: "1.21.2"

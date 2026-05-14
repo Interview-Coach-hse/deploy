@@ -1,12 +1,12 @@
 # Vault
 
-Этот каталог хранит базовую установку HashiCorp Vault для single-node Kubernetes-кластера.
+Этот каталог хранит локальный минимальный Helm chart для HashiCorp Vault под single-node Kubernetes-кластер.
 
 ## Что разворачивается
 
-- `Vault` в режиме `standalone`
+- `Vault` как один `StatefulSet`
 - `PersistentVolumeClaim` для хранения данных
-- `UI` как ClusterIP service внутри кластера
+- `Service` внутри кластера на `8200`
 
 ## Что важно после установки
 
@@ -48,4 +48,4 @@ kubectl exec -n vault vault-0 -- vault kv put secret/interview-coach/postgres \
 
 4. Создать policy и роль для `External Secrets Operator`.
 
-Подробные шаги ниже описаны в общем `README.md`.
+Подробные шаги ниже описаны в общем [README.md](/Users/sir/Desktop/Diplom/project/deploy/README.md).
